@@ -17,13 +17,18 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ModelDataPopup } from "@/app/components/ModelDataPopup";
+import VoiceAgent from "@/app/components/VoiceAgent";
 
 export default function Home() {
-  const [selectedVoice, setSelectedVoice] = useState("sarah");
-  const [selectedProvider, setSelectedProvider] = useState("11labs");
-  const [selectedModel, setSelectedModel] = useState("Eleven Flash V2.5");
+  const [selectedVoice, setSelectedVoice] = useState("morgan");
+  const [selectedProvider, setSelectedProvider] = useState("lmnt");
+  const [selectedModel, setSelectedModel] = useState("aurora");
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [minChars, setMinChars] = useState("10");
   const [backgroundSound, setBackgroundSound] = useState("Default");
+  const [transcriberProvider, setTranscriberProvider] = useState("deepgram");
+  const [transcriberModel, setTranscriberModel] = useState("nova-3");
+  const [transcriberLanguage, setTranscriberLanguage] = useState("en");
   const [selectedAssistant, setSelectedAssistant] = useState("Mary");
   const [activeTab, setActiveTab] = useState("model");
   const [firstMessage, setFirstMessage] = useState(
@@ -32,8 +37,8 @@ export default function Home() {
   const [systemPrompt, setSystemPrompt] = useState(
     'You are a voice assistant for Mary&apos;s Dental, a dental office located at 123 North Face Place, Anaheim, California. The hours are 8 AM to 5PM daily, but they are closed on Sundays.\n\nMary&apos;s dental provides dental services to the local Anaheim community. The practicing dentist is Dr. Mary Smith.\n\nYou are tasked with answering questions about the business, and booking appointments. If they wish to book an appointment, your goal is to gather necessary information from callers in a friendly and efficient manner like follows:\n\n1. Ask for their full name.\n2. Ask for the purpose of their appointment.\n3. Request their preferred date and time for the appointment.\n4. Confirm all details with the caller, including the date and time of the appointment.\n\n- Be sure to be kind of funny and witty!\n- Keep all your responses short and simple. Use casual language, phrases like "Umm...", "Well...", and "I mean" are preferred.\n- This is a voice conversation, so keep your responses short, like in a real conversation. Don&apos;t ramble for too long.'
   );
-  const [modelProvider, setModelProvider] = useState("openai");
-  const [aiModel, setAiModel] = useState("gpt-4o-mini");
+  const [modelProvider, setModelProvider] = useState("nebius");
+  const [aiModel, setAiModel] = useState("llama-3.2-3B-instruct");
   const [temperature, setTemperature] = useState(1);
   const [maxTokens, setMaxTokens] = useState(250);
   const [detectEmotion, setDetectEmotion] = useState(true);
@@ -65,11 +70,14 @@ export default function Home() {
         provider: selectedProvider,
         voice: selectedVoice,
         model: selectedModel,
+        language: selectedLanguage,
         backgroundSound,
         minChars
       },
       transcriber: {
-        // Add transcriber properties when they become available
+        provider: transcriberProvider,
+        model: transcriberModel,
+        language: transcriberLanguage
       }
     };
 
@@ -205,6 +213,12 @@ export default function Home() {
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26d0ce] data-[state=active]:to-[#9be15d] data-[state=active]:text-[#001f2b]"
               >
                 Voice
+              </TabsTrigger>
+              <TabsTrigger
+                value="test"
+                className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26d0ce] data-[state=active]:to-[#9be15d] data-[state=active]:text-[#001f2b]"
+              >
+                Test Agent
               </TabsTrigger>
               <TabsTrigger
                 value="functions"
@@ -462,10 +476,7 @@ export default function Home() {
                   Voice Configuration
                 </h2>
                 <p className="text-[#89898a] text-sm mb-6">
-                  Choose from the list of voices, or sync your voice library if
-                  you aren&apos;t able to find your voice in the dropdown. If
-                  you are still facing any error, you can enable custom voice
-                  and add a voice ID manually.
+                  Choose from the list of LMNT voices, or add a custom voice ID manually if you have created your own voice.
                 </p>
 
                 <div className="grid grid-cols-2 gap-6">
@@ -481,7 +492,7 @@ export default function Home() {
                         <SelectValue placeholder="Select provider" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#232323] text-white border-[#3a3a3a]">
-                        <SelectItem value="11labs">11labs</SelectItem>
+                        <SelectItem value="lmnt">LMNT</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -506,7 +517,13 @@ export default function Home() {
                         <SelectValue placeholder="Select voice" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#232323] text-white border-[#3a3a3a]">
-                        <SelectItem value="sarah">sarah</SelectItem>
+                        <SelectItem value="morgan">Morgan (UK, Female)</SelectItem>
+                        <SelectItem value="ava">Ava (US, Female)</SelectItem>
+                        <SelectItem value="jack">Jack (US, Male)</SelectItem>
+                        <SelectItem value="alex">Alex (US, Male)</SelectItem>
+                        <SelectItem value="emma">Emma (UK, Female)</SelectItem>
+                        <SelectItem value="noah">Noah (US, Male)</SelectItem>
+                        <SelectItem value="sophia">Sophia (US, Female)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -532,7 +549,7 @@ export default function Home() {
                     Model
                   </Label>
                   <p className="text-[#89898a] text-sm mb-2">
-                    This is the model that will be used.
+                    Select the LMNT model to use for speech synthesis.
                   </p>
                   <Select
                     value={selectedModel}
@@ -542,9 +559,43 @@ export default function Home() {
                       <SelectValue placeholder="Select model" />
                     </SelectTrigger>
                     <SelectContent className="bg-[#232323] text-white border-[#3a3a3a]">
-                      <SelectItem value="Eleven Flash V2.5">
-                        Eleven Flash V2.5
+                      <SelectItem value="aurora">
+                        Aurora (Default)
                       </SelectItem>
+                      <SelectItem value="blizzard">
+                        Blizzard (Experimental)
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="mt-6">
+                  <Label className="text-[#89898a] mb-2 block font-medium">
+                    Language
+                  </Label>
+                  <p className="text-[#89898a] text-sm mb-2">
+                    Select the language for speech synthesis.
+                  </p>
+                  <Select
+                    value={selectedLanguage}
+                    onValueChange={setSelectedLanguage}
+                  >
+                    <SelectTrigger className="w-full bg-[#232323] border-[#3a3a3a] text-white">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#232323] text-white border-[#3a3a3a] max-h-[300px] overflow-y-auto">
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                      <SelectItem value="de">German</SelectItem>
+                      <SelectItem value="it">Italian</SelectItem>
+                      <SelectItem value="pt">Portuguese</SelectItem>
+                      <SelectItem value="zh">Chinese</SelectItem>
+                      <SelectItem value="ja">Japanese</SelectItem>
+                      <SelectItem value="ko">Korean</SelectItem>
+                      <SelectItem value="ru">Russian</SelectItem>
+                      <SelectItem value="hi">Hindi</SelectItem>
+                      <SelectItem value="tr">Turkish</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -650,9 +701,112 @@ export default function Home() {
                 <p className="text-[#89898a] text-sm mb-6">
                   Configure the transcription settings for your assistant.
                 </p>
-                <div className="flex flex-col items-center justify-center text-[#89898a] py-12">
-                  <p className="mb-2">
-                    Transcriber settings will be available soon.
+                
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <Label className="text-[#89898a] mb-2 block font-medium">
+                      Provider
+                    </Label>
+                    <Select
+                      value={transcriberProvider}
+                      onValueChange={setTranscriberProvider}
+                    >
+                      <SelectTrigger className="w-full bg-[#232323] border-[#3a3a3a] text-white">
+                        <SelectValue placeholder="Select provider" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#232323] text-white border-[#3a3a3a]">
+                        <SelectItem value="deepgram">deepgram</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label
+                      className="mb-2 block font-medium"
+                      style={{
+                        background:
+                          "linear-gradient(90deg, #26d0ce 0%, #9be15d 100%)",
+                        WebkitBackgroundClip: "text",
+                        WebkitTextFillColor: "transparent",
+                      }}
+                    >
+                      Model
+                    </Label>
+                    <Select
+                      value={transcriberModel}
+                      onValueChange={setTranscriberModel}
+                    >
+                      <SelectTrigger className="w-full bg-[#232323] border-[#3a3a3a] text-white">
+                        <SelectValue placeholder="Select model" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#232323] text-white border-[#3a3a3a] max-h-[300px] overflow-y-auto">
+                        <SelectItem value="nova-3">Nova-3</SelectItem>
+                        <SelectItem value="nova-3-general">Nova-3-General</SelectItem>
+                        <SelectItem value="nova-3-medical">Nova-3-Medical</SelectItem>
+                        <SelectItem value="nova-2">Nova-2</SelectItem>
+                        <SelectItem value="nova-2-general">Nova-2-General</SelectItem>
+                        <SelectItem value="nova-2-meeting">Nova-2-Meeting</SelectItem>
+                        <SelectItem value="nova-2-phonecall">Nova-2-Phonecall</SelectItem>
+                        <SelectItem value="nova-2-finance">Nova-2-Finance</SelectItem>
+                        <SelectItem value="nova-2-conversationalai">Nova-2-ConversationalAI</SelectItem>
+                        <SelectItem value="nova-2-voicemail">Nova-2-Voicemail</SelectItem>
+                        <SelectItem value="nova-2-video">Nova-2-Video</SelectItem>
+                        <SelectItem value="nova-2-medical">Nova-2-Medical</SelectItem>
+                        <SelectItem value="nova-2-drivethru">Nova-2-DriveThru</SelectItem>
+                        <SelectItem value="nova-2-automotive">Nova-2-Automotive</SelectItem>
+                        <SelectItem value="nova-2-atc">Nova-2-ATC</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <Label className="text-[#89898a] mb-2 block font-medium">
+                    Language
+                  </Label>
+                  <p className="text-[#89898a] text-sm mb-2">
+                    Select the language for transcription.
+                  </p>
+                  <Select
+                    value={transcriberLanguage}
+                    onValueChange={setTranscriberLanguage}
+                  >
+                    <SelectTrigger className="w-full bg-[#232323] border-[#3a3a3a] text-white">
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#232323] text-white border-[#3a3a3a] max-h-[300px] overflow-y-auto">
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="en-US">English (US)</SelectItem>
+                      <SelectItem value="en-AU">English (Australia)</SelectItem>
+                      <SelectItem value="en-GB">English (UK)</SelectItem>
+                      <SelectItem value="en-NZ">English (New Zealand)</SelectItem>
+                      <SelectItem value="en-IN">English (India)</SelectItem>
+                      <SelectItem value="multi">Multilingual (Spanish + English)</SelectItem>
+                      <SelectItem value="es">Spanish</SelectItem>
+                      <SelectItem value="es-419">Spanish (Latin America)</SelectItem>
+                      <SelectItem value="fr">French</SelectItem>
+                      <SelectItem value="fr-CA">French (Canada)</SelectItem>
+                      <SelectItem value="de">German</SelectItem>
+                      <SelectItem value="it">Italian</SelectItem>
+                      <SelectItem value="ja">Japanese</SelectItem>
+                      <SelectItem value="ko">Korean</SelectItem>
+                      <SelectItem value="pt">Portuguese</SelectItem>
+                      <SelectItem value="pt-BR">Portuguese (Brazil)</SelectItem>
+                      <SelectItem value="ru">Russian</SelectItem>
+                      <SelectItem value="zh">Chinese</SelectItem>
+                      <SelectItem value="zh-CN">Chinese (Simplified)</SelectItem>
+                      <SelectItem value="zh-TW">Chinese (Traditional)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="mt-6 p-4 bg-[#232323] rounded-md border border-[#3a3a3a]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Info size={16} className="text-[#26d0ce]" />
+                    <span className="text-white font-medium">Pro tip</span>
+                  </div>
+                  <p className="text-[#89898a] text-sm">
+                    If you want to support both English and Spanish, you can set the language to <span className="text-[#9be15d]">multi</span> and use <span className="text-[#9be15d]">ElevenLabs Turbo 2.5</span> in the <span className="text-[#9be15d]">Voice</span> tab.
                   </p>
                 </div>
               </Card>
@@ -759,6 +913,57 @@ export default function Home() {
                     Analysis settings will be available soon.
                   </p>
                 </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="test" className="space-y-6">
+              <Card
+                className="bg-[#1b1b1b] border-[#2a2a2a] p-6"
+                style={{
+                  borderImage: "linear-gradient(to right, #26d0ce, #9be15d) 1",
+                  borderWidth: "1px",
+                  borderStyle: "solid",
+                }}
+              >
+                <h2
+                  className="text-lg font-medium mb-2"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #26d0ce 0%, #9be15d 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  Test Your Voice Agent
+                </h2>
+                <p className="text-[#89898a] text-sm mb-6">
+                  Test your voice agent with the current configuration. Click the microphone button to start speaking.
+                </p>
+                
+                <VoiceAgent 
+                  config={{
+                    model: {
+                      provider: modelProvider,
+                      model: aiModel,
+                      temperature: temperature,
+                      maxTokens: maxTokens,
+                      systemPrompt: systemPrompt,
+                      firstMessage: "Hello! How can I help you today?"
+                    },
+                    voice: {
+                      provider: selectedProvider,
+                      voice: selectedVoice,
+                      model: selectedModel,
+                      language: selectedLanguage,
+                      minChars: minChars
+                    },
+                    transcriber: {
+                      provider: transcriberProvider,
+                      model: transcriberModel,
+                      language: transcriberLanguage
+                    }
+                  }}
+                />
               </Card>
             </TabsContent>
           </Tabs>
