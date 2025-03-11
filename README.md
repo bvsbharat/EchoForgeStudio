@@ -79,6 +79,12 @@ yarn dev
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
+Make sure you have below keys 
+
+1. https://nebius.com/
+2. https://lmnt.com/
+3. https://deepgram.com/
+
 ## Project Structure
 
 ```
